@@ -150,14 +150,14 @@ Write-Host Connecting to ShadowControl to retrieve list of connected devices. -F
 #Connect to Shadowcontrol and query all endpoints for a customer
 
 if (Test-Connection -ComputerName shadowcontrol.futurecomputers.com.au -ErrorAction SilentlyContinue){
-$hostname = "connect.futurecomputers.com.au"
+$hostname = "https://connect.futurecomputers.com.au/api/reports/status/?"
 }
 else {
-$hostname = "localhost"
+$hostname = "https://localhost/api/reports/status/?"
 }
 
 $endpoints = @()
-$web = invoke-webrequest -Uri "https://$hostname/api/reports/status/?" -Headers @{"CMD_TOKEN" = $sckey} 
+$web = invoke-webrequest -Uri $hostname -Headers @{"CMD_TOKEN" = $sckey} 
 $endpoints = $web.content | ConvertFrom-Json | Get-ObjectMembers 
 
 $array = @()

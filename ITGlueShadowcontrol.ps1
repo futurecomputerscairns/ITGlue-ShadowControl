@@ -232,8 +232,8 @@ foreach ($endpoint in $endpoints.value){
     $IMPCName = $endpoint.name
     $IMVersion = $endpoint.imagemanager.version.version
     $IMManagedFolders = $endpoint.imagemanager.folders.path
-    $IMManagedFolders = $IMManagedFolders -join "," 
-    $IMManagedFolders = ($IMManagedFolders -replace(",",", ")).ToString()
+    $IMManagedFolders = $IMManagedFolders -join "<br>" | Out-String
+    
 
         if ($endpoint.imagemanager.folders.'replication_jobs'){
         
@@ -251,8 +251,8 @@ foreach ($endpoint in $endpoints.value){
                         }
 
         $IMJobs = $endpoint.imagemanager.folders.replication_jobs.name
-        $IMJobs = $IMJobs -join "," 
-        $IMJobs = ($IMJobs -replace(",",", ")).ToString()
+        $IMJobs = $IMJobs -join "<br>" | Out-String
+       
         
         
         $object2 = New-Object psobject

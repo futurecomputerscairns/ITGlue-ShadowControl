@@ -43,7 +43,7 @@ $headers = @{
     "x-api-key" = $key
 }
 
-Import-Module ITGlueApi -Force
+Import-Module C:\temp\itglue\modules\itgluepowershell\ITGlueAPI.psd1 -Force
 Add-ITGlueAPIKey -Api_Key $key
 Add-ITGlueBaseURI -base_uri $ITGbaseURI
 

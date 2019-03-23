@@ -122,24 +122,30 @@ function UpdateITGItem ($resource, $existingItem, $newBody) {
     return $updatedItem
 }
 
-function BuildShadowControlAsset ($tenantInfo) {
+function BuildShadowControlTenantAsset ($tenantInfo) {
     
-    $body =[ordered]@{
+    $body = @{
+        data = @{
             type       = "flexible-assets"
             attributes = @{
-                "organization_id"        = $ITGlueOrganisation
-                "flexible_asset_type_id" = $assettypeID
+                "organization-id"        = $ITGlueOrganisation
+                "flexible-asset-type-id" = $assettypeID
                 traits                   = @{
                     "protected-server"        = $obj.ServerID
                     "storagecraft-product"    = $obj.SPName
-                    "version"                 = $obj.SPVersion
+                    "shadowprotect-version"   = $obj.SPVersion
                     "backup-name"             = $obj.JobName
                     "backup-destination"      = $obj.JobDestination
                     "backup-mode"             = $obj.JobMode
                     "backup-schedule"         = $obj.JobSchedule
+                    "imagemanager-version"    = $obj.IMVersion
+                    "imagemanager-managed-folders"     = $obj.IMManagedFolders
+                    "imagemanager-replication"         = $obj.RepType
+                    "imagemanager-replication-jobs"    = $obj.IMJobs
                 }
             }
         }
+ }
     
     $tenantAsset = $body | ConvertTo-Json -Depth 10
     return $tenantAsset
@@ -149,8 +155,15 @@ Write-Host Connecting to ShadowControl to retrieve list of connected devices. -F
 
 #Connect to Shadowcontrol and query all endpoints for a customer
 
+if (Test-Connection -ComputerName connect.futurecomputers.com.au -ErrorAction SilentlyContinue){
+$hostname = "https://connect.futurecomputers.com.au/api/reports/status/?"
+}
+else {
+$hostname = "https://shadowcontrol.futurecomputers.local/api/reports/status/?"
+}
+
 $endpoints = @()
-$web = invoke-webrequest -Uri "https://shadowcontrol.futurecomputers.local/api/reports/status/?" -Headers @{"CMD_TOKEN" = $sckey} -UseBasicParsing 
+$web = invoke-webrequest -Uri $hostname -Headers @{"CMD_TOKEN" = $sckey} -UseBasicParsing 
 $endpoints = $web.content | ConvertFrom-Json | Get-ObjectMembers 
 
 $array = @()
@@ -226,7 +239,7 @@ foreach ($endpoint in $endpoints.value){
     $IMPCName = $endpoint.name
     $IMVersion = $endpoint.imagemanager.version.version
     $IMManagedFolders = $endpoint.imagemanager.folders.path
-    $IMManagedFolders = $IMManagedFolders -join ","
+    $IMManagedFolders = $IMManagedFolders -join "," 
     $IMManagedFolders = ($IMManagedFolders -replace(",",", ")).ToString()
 
         if ($endpoint.imagemanager.folders.'replication_jobs'){
@@ -245,7 +258,7 @@ foreach ($endpoint in $endpoints.value){
                         }
 
         $IMJobs = $endpoint.imagemanager.folders.replication_jobs.name
-        $IMJobs = $IMJobs -join ","
+        $IMJobs = $IMJobs -join "," 
         $IMJobs = ($IMJobs -replace(",",", ")).ToString()
         
         
@@ -387,38 +400,9 @@ Write-Host Failed to delete existing flexible assets for $org, ignore if this is
 Write-Host Existing flexible assets removed, now creating current flexible objects. -ForegroundColor Green
 
 foreach ($obj in $serverarray){
-    
-    $body = @{
-        data = @{
-            type       = "flexible-assets"
-            attributes = @{
-                "organization_id"        = $ITGlueOrganisation
-                "flexible_asset_type_id" = $assettypeID
-                traits                   = @{
-                    "protected-server"        = $obj.ServerID
-                    "storagecraft-product"    = $obj.SPName
-                    "version"                 = $obj.SPVersion
-                    "backup-name"             = $obj.JobName
-                    "backup-destination"      = $obj.JobDestination
-                    "backup-mode"             = $obj.JobMode
-                    "backup-schedule"         = $obj.JobSchedule
-                    "imagemanager-version"    = $obj.IMVersion
-                    "imagemanager-managed-folders"     = $obj.IMManagedFolders
-                    "imagemanager-replication"         = $obj.RepType
-                    "imagemanager-replication-jobs"    = $obj.IMJobs
-                }
-            }
-        }
- }
-    
-            $tenantAsset = $body | ConvertTo-Json -Depth 10
-
-
-    
-
-
-            CreateITGItem -resource flexible_assets -body $tenantAsset
-            Write-Host "Created Shadowcontrol Object in $org for $($obj.ServerName)"
+    $body = BuildShadowControlTenantAsset -tenantInfo $obj
+    CreateITGItem -resource flexible_assets -body $body
+    Write-Host "Created Shadowcontrol Object in $org for $($obj.ServerName)"
     }
 
 }

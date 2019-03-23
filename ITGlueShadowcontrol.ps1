@@ -157,7 +157,7 @@ $hostname = "https://shadowcontrol.futurecomputers.local/api/reports/status/?"
 }
 
 $endpoints = @()
-$web = invoke-webrequest -Uri $hostname -Headers @{"CMD_TOKEN" = $sckey} 
+$web = invoke-webrequest -Uri $hostname -Headers @{"CMD_TOKEN" = $sckey} -UseBasicParsing 
 $endpoints = $web.content | ConvertFrom-Json | Get-ObjectMembers 
 
 $array = @()

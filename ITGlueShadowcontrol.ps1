@@ -153,7 +153,7 @@ if (Test-Connection -ComputerName shadowcontrol.futurecomputers.com.au -ErrorAct
 $hostname = "https://connect.futurecomputers.com.au/api/reports/status/?"
 }
 else {
-$hostname = "https://localhost/api/reports/status/?"
+$hostname = "https://shadowcontrol.futurecomputers.local/api/reports/status/?"
 }
 
 $endpoints = @()

@@ -75,6 +75,7 @@ show-in-list           : True
 ```
 
 2. Now you need to edit line #41 of the script in a text editor and replace the ID with your own. To find this, the new flexible asset type needs to be added to your sidebar (Account > Settings > Customize Sidebar - Drag your new asset type from 'Flexible Assets to the 'Apps & Services' bar under 'Sidebar Sections'). Dont forget to hit Save right down the bottom. Now, return to a customer and click on your new asset in the sidebar. The URL will now show the asset type ID, as shown below:
+
 ![assettypeID](https://i.imgur.com/A3s67d2.png)
 
 3. You will now need to create an API key in ITGlue, for the script to be able to interact with ITGlue. You will not need Password Access enabled for this API key.

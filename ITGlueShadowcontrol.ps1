@@ -206,6 +206,12 @@ foreach ($endpoint in $endpoints.value){
                 elseif($jobsch -eq 180){
                         $jobsch = "Every 3 Hours"
                         }
+                elseif($jobsch -eq 600){
+                        $jobsch = "Every 10 Hours"
+                        }
+                elseif($jobsch -eq 300){
+                        $jobsch = "Every 5 Hours"
+                        }
                     
 
                 $object = New-Object psobject

@@ -389,6 +389,7 @@ foreach ($obj in $serverarray){
 $existingAssets = @()
 $existingAssets += GetAllITGItems -Resource "flexible_assets?filter[organization_id]=$ITGlueOrganisation&filter[flexible_asset_type_id]=$assetTypeID"
 $matchingAsset = $existingAssets | Where-Object {$_.attributes.traits.'protected-server'.values.name -contains $obj.ServerName}
+$matchingAsset = $matchingAsset | Where-Object {$_.attributes.traits.'backup-name' -match $obj.Jobname}
 
 if ($matchingAsset) {
         Write-Output "Updating Shadowcontrol object $($obj.ServerName) for $org"

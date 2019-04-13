@@ -1,6 +1,7 @@
 Param (
        [string]$key = "",
-       [string]$SCkey = ""
+       [string]$SCkey = "",
+       [string]$hostname = ""
        )
 
 if (-not ([System.Management.Automation.PSTypeName]'ServerCertificateValidationCallback').Type)
@@ -156,7 +157,8 @@ Write-Host Connecting to ShadowControl to retrieve list of connected devices. -F
 #Connect to Shadowcontrol and query all endpoints for a customer
 
 $endpoints = @()
-$web = invoke-webrequest -Uri "https://shadowcontrol.futurecomputers.local/api/reports/status/?" -Headers @{"CMD_TOKEN" = $sckey} -UseBasicParsing 
+$hostname = 'https://' + $hostname + '/api/reports/status/?'
+$web = invoke-webrequest -Uri $hostname -Headers @{"CMD_TOKEN" = $sckey} -UseBasicParsing 
 $endpoints = $web.content | ConvertFrom-Json | Get-ObjectMembers 
 
 $array = @()
@@ -288,6 +290,8 @@ Write-Host Retrieving customer configurations from ITGlue for $org -ForegroundCo
 
 $customerservers = Get-ITGlueItem
 
+Start-Sleep -Seconds 3
+
 $customerservers = $customerservers.attributes.name
 
 $protectedservers = @()
@@ -373,29 +377,29 @@ $protectedservers | ForEach-Object{
                                                 }
 
 
-write-host Finished gathering device information for $org, now removing existing flexible assets from ITGlue. -ForegroundColor Green
-
-
-#Remove existing Flexible assets
-
-try {
-$existing = Get-ITGlueFlexibleAssets -filter_flexible_asset_type_id $assettypeID -filter_organization_id $ITGlueOrganisation
-$existing.data | % {
-
-Write-Host Removing $_.attributes.traits.'backup-name' from ITGlue
-
-Remove-ITGlueFlexibleAssets -id $_.id -Confirm:$false}
-}
-catch{
-Write-Host Failed to delete existing flexible assets for $org, ignore if this is the first time run.
-}
-
-Write-Host Existing flexible assets removed, now creating current flexible objects. -ForegroundColor Green
+write-host Finished gathering device information for $org, now updating ITGlue. -ForegroundColor Green
 
 foreach ($obj in $serverarray){
-    $body = BuildShadowControlTenantAsset -tenantInfo $obj
-    CreateITGItem -resource flexible_assets -body $body
-    Write-Host "Created Shadowcontrol Object in $org for $($obj.ServerName)"
+$existingAssets = @()
+$existingAssets += GetAllITGItems -Resource "flexible_assets?filter[organization_id]=$ITGlueOrganisation&filter[flexible_asset_type_id]=$assetTypeID"
+$matchingAsset = $existingAssets | Where-Object {$_.attributes.traits.'protected-server'.values.name -contains $obj.ServerName}
+
+if ($matchingAsset) {
+        Write-Output "Updating Shadowcontrol object $($obj.ServerName) for $org"
+        $UpdatedBody = BuildShadowControlTenantAsset -tenantInfo $obj
+        $updatedItem = UpdateITGItem -resource flexible_assets -existingItem $matchingAsset -newBody $UpdatedBody
+        Start-Sleep -Seconds 3
+    }
+    else {
+        Write-Output "Creating Shadowcontrol object $($obj.ServerName) for $org"
+        $body = BuildShadowControlTenantAsset -tenantInfo $obj
+        CreateITGItem -resource flexible_assets -body $body
+        Start-Sleep -Seconds 3
+        
+    }
+
+
+    
     }
 
 }

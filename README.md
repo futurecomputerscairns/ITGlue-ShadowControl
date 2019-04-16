@@ -86,7 +86,7 @@ show-in-list           : True
 2. Under the API Keys > Custom API Keys, give the key a name and then generate it. Note that you can't view a key again after it has been generated. 
 ```
 
-3. Finally, you need to create an API token for ShadowControl, with the [Storagecraft guide found here.](https://support.storagecraft.com/s/article/configuring-users-and-access?language=en_US#node_29429)
+4. Finally, you need to create an API token for ShadowControl, with the [Storagecraft guide found here.](https://support.storagecraft.com/s/article/configuring-users-and-access?language=en_US#node_29429)
 
 
 
@@ -96,5 +96,5 @@ Running the script is as follows:
 
 #Example
 
-.\ITGlueShadowcontrol.ps1 -key ITG.123456789ABCDEFGHIJ -sckey 12345678910 -hostname shadowcontrol.constoso.com
+.\ITGlueShadowcontrol.ps1 -key ITG.123456789ABCDEFGHIJ -sckey 12345678910 -hostname shadowcontrol.contoso.com
 
